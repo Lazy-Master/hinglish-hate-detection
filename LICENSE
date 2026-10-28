@@ -1,0 +1,11 @@
+# Licence
+
+- **Code in this repository:** _[TBD — recommend MIT or Apache-2.0 for the course submission]_.
+- **Dataset (Plan B, `nikitadesai/hasoc`):** **CC-BY-NC-4.0** — academic/non-commercial use
+  permitted, attribution required. Cite the dataset and its overview paper
+  (Satapara et al., FIRE 2021, CEUR Vol-3159 T1-2).
+- **Dataset (Plan A, HASOC 2021 ICHCL):** research use under the FIRE shared-task terms.
+- **Model weights (`google/muril-base-cased`):** subject to Google's MuRIL model licence;
+  cite Khanuja et al. (2021), arXiv:2103.10730.
+
+Choose a code licence and replace this file with the full text before the Day-7 submission.

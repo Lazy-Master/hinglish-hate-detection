@@ -1,0 +1,11 @@
+﻿model,seed,macro_f1,macro_f1_ci_lo,macro_f1_ci_hi,mcc,balanced_acc,train_min,ms_per_infer,note
+majority_floor,42,,,,,,,,majority-class floor
+random_floor,42,,,,,,,,random floor
+B0_tfidf_svm,42,,,,,,<2,,"char 2-5gram + word 1-2gram, LinearSVC"
+B0_tfidf_svm,43,,,,,,<2,
+B0_tfidf_svm,44,,,,,,<2,
+A0_muril_context,42,,,,,,~25,,
+A0_muril_context,43,,,,,,~25,,
+A0_muril_context,44,,,,,,~25,,
+A0_muril_nocontext,42,,,,,,~25,,ablation
+A0_xlmr_control,42,,,,,,~30,,control

@@ -1,0 +1,33 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# --- Raw / gated data (NEVER commit) ---
+data/raw/**
+!data/raw/.gitkeep
+*.zip
+*.json.bak
+
+# --- Model weights (too large; log their sha256 instead) ---
+best_model/
+*.bin
+*.safetensors
+models/
+
+# --- Logs & intermediates ---
+logs/
+*.log
+.ipynb_checkpoints/
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+*.swp
+
+# --- Secrets ---
+.env
+*.token
