@@ -8,7 +8,7 @@ Fill the matrix on Day 1 and keep it honest. Each member should be able to prese
 | Member | GitHub handle | Primary workstream | Backup |
 |---|---|---|---|
 | _TBD_ | `@Lazy-Master` (owner) | _TBD (M1–M4)_ | – |
-| _TBD_ | `@sohamvaidya333` | _TBD_ | _TBD_ |
+| Soham Nilesh Vaidya | `@SohamVaidya12` | _TBD_ | _TBD_ |
 | _TBD_ | _add handle_ | _TBD_ | _TBD_ |
 | _TBD_ | _add handle_ | _TBD_ | _TBD_ |
 

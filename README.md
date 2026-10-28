@@ -4,6 +4,17 @@
 > A 7-day, 20-mark course activity comparing a classical baseline against a transformer model.
 > This repository is the shared workspace for the team — it is **private** and shared with all members.
 
+<p align="center">
+  <img src="https://img.shields.io/badge/visibility-private-red?style=flat-square&logo=github&logoColor=white" alt="private"/>
+  <img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python"/>
+  <img src="https://img.shields.io/badge/PyTorch-2.4-EE4C2C?style=flat-square&logo=pytorch&logoColor=white" alt="PyTorch"/>
+  <img src="https://img.shields.io/badge/Model-MuRIL%20base%20cased-FF6F00?style=flat-square&logo=huggingface&logoColor=white" alt="MuRIL"/>
+  <img src="https://img.shields.io/badge/Dataset-CC--BY--NC--4.0-lightgrey?style=flat-square" alt="Dataset licence"/>
+  <img src="https://img.shields.io/badge/Metric-Macro--F1-0969DA?style=flat-square" alt="Macro-F1"/>
+</p>
+
+**Stack:** Python · scikit-learn · PyTorch · Hugging Face Transformers · Gradio · pandas / NumPy · Matplotlib
+
 ---
 
 ## 1. Problem statement
@@ -115,10 +126,7 @@ See `REPRODUCE.md` for the authoritative, ordered command list with expected run
 
 - **Visibility:** Private repository (course activity).
 - **Owner:** `@Lazy-Master`
-- **Collaborators (write):** _pending_ — invite the GitHub account for `sohamvaidya333@gmail.com`. ⚠️ The handle `sohamvaidya333` does not exist, and `sohamvaidya` is an **organisation**, not a person, so GitHub rejects it as a collaborator. Confirm the person's real GitHub username, then run:
-  ```bash
-  gh api -X PUT repos/Lazy-Master/hinglish-hate-detection/collaborators/<USERNAME> -f permission=push
-  ```
+- **Collaborators (write):** `@SohamVaidya12` — **Soham Nilesh Vaidya** (`sohamvaidya333@gmail.com`), M.Tech AI&DS. Invite sent with **write** access. ✅
 - **Workstreams:** M1 Data · M2 Baseline & stats · M3 Models · M4 Repo/demo/slides. See `CONTRIBUTING.md`.
 
 ## 9. AI-use statement
