@@ -4,7 +4,7 @@ baseline_b0.py  (M2 — Baseline & stats)
 HOW TO EXPLAIN THIS MODULE (Day-6 dry run):
   • What it does : Trains the B0 baseline — char n-gram TF-IDF + word n-gram TF-IDF, hstacked,
                    classified by a balanced LinearSVC. Also emits majority/random floors.
-  • Inputs       : data/processed/processed.csv (text_clean, label). Post text ONLY (no context).
+  • Inputs       : data/processed/{train,val,test}.csv (text, label). Post text only.
   • Outputs      : rows appended to results/results.csv (model, seed, macro_f1, mcc, ...).
   • The one gotcha: This is the HONEST reference (~0.62–0.70 Macro-F1), not a strawman.
                    Sublinear_tf + class_weight='balanced' matter under imbalance.
@@ -34,7 +34,7 @@ def main():
     ap.add_argument("--seeds", nargs="+", type=int, default=SEEDS)
     ap.add_argument("--out", default="results/results.csv")
     args = ap.parse_args()
-    df = pd.read_csv("data/processed/processed.csv")
+    df = pd.read_csv("data/processed/train.csv")
     # PLACEHOLDER: run 3 seeds, compute macro_f1 + mcc, append to results/results.csv
     raise NotImplementedError("Train B0 across seeds and write results rows here.")
 

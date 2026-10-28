@@ -1,17 +1,21 @@
 # Dataset provenance (data/processed/)
 
 This file records exactly which data was used and its integrity hash, so every result is traceable.
+It is **regenerated** by `src/prepare_data.py`; the values below are the expected shape until you run it.
 
 | Field | Value |
 |---|---|
-| Plan used | _TBD (A or B)_ |
-| Source | _TBD_ |
-| Licence | Plan B: CC-BY-NC-4.0 (attribution required). Plan A: HASOC 2021 task terms. |
-| Raw rows | _TBD_ |
-| Train / Val / Test | _TBD / TBD / TBD_ (stratified 80/10/10, split by conversation) |
-| `processed.csv` sha256 | _TBD_ |
-| Inter-annotator κ | HASOC ICHCL ≈ 0.47 (label noise ceiling — report as a limitation) |
-| Script distribution | _TBD (Devanagari vs romanised)_ |
-| De-identification | `@handle → <USER>`, `URL → <URL>`, names stripped, emojis kept, slurs masked |
+| Dataset | `pankajbiswas6/prism-hinglish-hate-speech` (Hugging Face) |
+| Licence | **MIT** — fully open, ungated, attribution required |
+| Access | `load_dataset("pankajbiswas6/prism-hinglish-hate-speech")` (no password) |
+| Filter | `lang == "hinglish"` (romanised code-mixed) |
+| Columns | `text`, `label` (0 = non-hate, 1 = hate) |
+| Upstream splits | train 17,704 / validation 2,950 / test 8,852 (used as-is, not re-split) |
+| Hinglish subset | ~4,783 rows across splits |
+| Label balance (full) | non-hate 53.5% / hate 46.5% |
+| `train.csv` sha256 | _TBD — printed by `prepare_data.py`_ |
+| De-identification | `@handle → <USER>`, `URL → <URL>`, emojis kept |
 
-> Fill the counts and sha256 after `python src/prepare_data.py` runs on Day 1.
+> **Provenance:** the card states this is derived from a Kaggle `combined_hate_speech_dataset`
+> compilation — cite it as a *derived open dataset*, and note this in Limitations.
+> **No parent posts:** conversational context is unavailable here → future work.

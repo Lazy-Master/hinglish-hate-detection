@@ -21,31 +21,39 @@ Social media in India is overwhelmingly **code-mixed**: a single post mixes Hind
 - the *same* reply can be hateful or harmless depending on its **parent post** (conversational context),
 - available code-mixed datasets are small and noisy (HASOC ICHCL inter-annotator κ ≈ 0.47).
 
-We frame the task as **Identification of Conversational Hate in Code-Mixed Language** (HASOC 2021 ICHCL Subtask 2): binary HOF (hate/offensive) vs NONE, optionally using the parent post as context.
+We frame the task as **binary hate detection on code-mixed Hinglish text**: label each post as **hate (1)** vs **non-hate (0)**. The open dataset we use ships single posts only — no parent thread — so conversational context is documented as **future work** rather than used here.
 
 ## 2. The two models
 
 | | Model | Backbone | Input | Why |
 |---|---|---|---|---|
 | 🔵 **B0 (baseline)** | Char n-gram TF-IDF + Linear SVM | `TfidfVectorizer` + `LinearSVC` | post text only | Classical, GPU-free reference that survives romanisation/noise. Expect Macro-F1 ≈ 0.62–0.70 — **not a strawman**. |
-| 🟢 **A0 (advanced)** | Context-aware MuRIL transformer | `google/muril-base-cased` (~178M) | `parent_post [SEP] target_post` | MuRIL is pretrained on Indian languages **including transliterated text** — our exact input distribution. |
+| 🟢 **A0 (advanced)** | MuRIL transformer (fine-tuned) | `google/muril-base-cased` (~178M) | post text | MuRIL is pretrained on Indian languages **including transliterated text** — our exact input distribution. |
 
 **Fairness contract** *(paste verbatim into the report §Methodology):*
-> *"Both models are trained and evaluated on the identical stratified split, using the same de-identification pipeline, the same decision-threshold policy (0.5, tuned only on the validation split), the same three random seeds, and the same held-out test set. The only differences between B0 and A0 are the representation learner and the use of conversational context, both of which are properties of the models under comparison rather than of the experimental setup."*
+> *"Both models are trained and evaluated on the identical stratified split, using the same de-identification pipeline, the same decision-threshold policy (0.5, tuned only on the validation split), the same three random seeds, and the same held-out test set. The only differences between B0 and A0 are the representation learner and the classifier head, both of which are properties of the models under comparison rather than of the experimental setup."*
 
 ## 3. Dataset
 
-| | Plan A (preferred) | Plan B (fallback, used if no HASOC password in 24h) |
-|---|---|---|
-| Source | **HASOC 2021 ICHCL** (FIRE shared task) | `nikitadesai/hasoc` on Hugging Face |
-| Size | 5,740 train / 1,348 official test | train split only → carve **stratified 80/10/10** |
-| Access | Password-gated (register via Google Form) | `gated: false`, **CC-BY-NC-4.0** |
-| Labels | HOF / NONE | HOF / NOT + SHOF / CHOF |
+**Dataset:** [`pankajbiswas6/prism-hinglish-hate-speech`](https://huggingface.co/datasets/pankajbiswas6/prism-hinglish-hate-speech) — **MIT licensed, ungated, open source**.
 
-> ⚠️ Plan B's HF repo ships only `traindata-basic.csv` (the declared `testdata_basic.csv` is absent) and is **Devanagari-heavy** — filter by script and report the distribution honestly.
-> Third fallback: `pankajbiswas6/prism-hinglish-hate-speech` (filter `language == 'hinglish'`), described only as a *mirrored compilation of Bohra et al. (2018)* — never cite as a research dataset.
+| Attribute | Value |
+|---|---|
+| Licence | **MIT** — fully open, commercial use allowed, attribution required |
+| Access | Ungated · `load_dataset("pankajbiswas6/prism-hinglish-hate-speech")` |
+| Size | 29,506 rows — train 17,704 / val 2,950 / test 8,852 (**already split**) |
+| Columns | `text`, `label` (0 = non-hate, 1 = hate), `lang` (`english` / `hindi` / `hinglish`) |
+| Composition | English 15,000 · Hindi (Devanagari) 9,767 · **Hinglish 4,783** |
+| Balance | non-hate 53.5% / hate 46.5% |
 
-**De-identification (required):** `@handles → <USER>`, URLs `→ <URL>`, names stripped; slurs masked (`b****d`) in all examples. Emojis are **kept**. Raw gated data is **never** committed (see `.gitignore`).
+Two valid setups:
+- **Code-mixed only (recommended):** filter `lang == "hinglish"` → ~4.8K romanised rows, e.g. *"tum log terrorism ko support karna band kardo"*.
+- **Full corpus:** all 29.5K rows as a Hindi + English + Hinglish hate corpus.
+
+> **Provenance & honesty:** the dataset card states it is derived from a Kaggle `combined_hate_speech_dataset` compilation — it is **not** a peer-reviewed gold set like HASOC. Say this in Limitations. The trade-off is deliberate: it is **MIT and ungated**, so the whole pipeline reproduces with no password, which the project requires.
+> **No parent posts:** this dataset has no conversation threads, so the context-aware variant from the original plan is dropped (see §2).
+
+**De-identification (required):** `@handles → <USER>`, URLs `→ <URL>`, names stripped; slurs masked (`b****d`) in all examples. Emojis are **kept**. Raw downloads are **never** committed (see `.gitignore`).
 
 ## 4. Evaluation (4 criteria, not 6)
 
@@ -54,7 +62,7 @@ We frame the task as **Identification of Conversational Hate in Code-Mixed Langu
 3. **Statistical reliability:** Bootstrap 95% CI (1,000 resamples) + McNemar's test.
 4. **Cost:** train minutes · param count · ms/inference.
 
-Plus **Figure 1**: a Macro-F1 bar chart with 95% CI error bars (majority-floor / B0 / A0-nocontext / A0).
+Plus **Figure 1**: a Macro-F1 bar chart with 95% CI error bars (majority-floor / B0 / A0 / A0-XLM-R).
 
 ## 5. Results (fill from `results/results.csv`)
 
@@ -62,8 +70,7 @@ Plus **Figure 1**: a Macro-F1 bar chart with 95% CI error bars (majority-floor /
 |---|---|---|---|---|
 | Majority floor | _TBD_ | _TBD_ | 0 | – |
 | **B0** TF-IDF + LinearSVC | _TBD_ | _TBD_ | < 2 min (CPU) | _TBD_ |
-| A0 − context (ablation) | _TBD_ | _TBD_ | ~25 min (T4) | _TBD_ |
-| **A0** MuRIL + context | _TBD_ | _TBD_ | ~25 min (T4) | _TBD_ |
+| **A0** MuRIL (fine-tuned) | _TBD_ | _TBD_ | ~25 min (T4) | _TBD_ |
 | A0 with XLM-R (control) | _TBD_ | _TBD_ | ~30 min (T4) | _TBD_ |
 
 > Report as one sentence, e.g. *"A0 outperformed B0 by ΔMacro-F1 = +0.06 [95% CI 0.03–0.09]; McNemar χ² = 27.4, p < 0.001."* If not significant, **say so** — a null result is a finding, not a failure.
@@ -78,7 +85,7 @@ hinglish-hate-detection/
 ├── CONTRIBUTING.md         ← contribution matrix: who did what (MVP evidence)
 ├── .gitignore
 ├── data/
-│   ├── raw/                ← gated/licenced raw data (gitignored)
+│   ├── raw/                ← downloaded raw data (gitignored)
 │   └── processed/          ← de-identified CSV + DATASET.md (sha256)
 ├── src/
 │   ├── prepare_data.py     ← M1: loader + PII stripper + stratified split
@@ -102,8 +109,8 @@ hinglish-hate-detection/
 
 ```bash
 pip install -r requirements.txt
-# 1) Data (M1) — produces data/processed/processed.csv
-python src/prepare_data.py --plan B --out data/processed/processed.csv
+# 1) Data (M1) — downloads the MIT dataset → data/processed/{train,val,test}.csv
+python src/prepare_data.py --lang hinglish --out data/processed
 # 2) Baseline (M2, CPU ~2 min)
 python src/baseline_b0.py --seeds 42 43 44 --out results/results.csv
 # 3) Advanced (M3, GPU ~25 min/seed)
@@ -120,22 +127,18 @@ See `REPRODUCE.md` for the authoritative, ordered command list with expected run
 
 ## 8. Team & access
 
-- **Visibility:** Private repository (course activity).
+- **Visibility:** Private repository.
 - **Owner:** `@Lazy-Master`
 - **Collaborators (write):** `@SohamVaidya12` — **Soham Nilesh Vaidya** (`sohamvaidya333@gmail.com`), M.Tech AI&DS. Invite sent with **write** access. ✅
 - **Workstreams:** M1 Data · M2 Baseline & stats · M3 Models · M4 Repo/demo/slides. See `CONTRIBUTING.md`.
 
-## 9. AI-use statement
-
-> Code in this repository was developed with AI assistance; **all experimental results were produced by executing the committed scripts on the cited public datasets**, and every figure in the report is generated by `src/make_tables.py` from `results/results.csv`. Training logs are committed under `logs/`. This statement plus a traceable `results.csv` is our defence against "were these numbers real?".
-
-## 10. Licence
+## 9. Licence
 
 - **Code:** _[to be decided — recommend MIT or Apache-2.0 for the submission]_.
-- **Data:** Plan B (`nikitadesai/hasoc`) is **CC-BY-NC-4.0** — academic use permitted, attribution required. Plan A (HASOC 2021) is research-use under task terms.
-- Cite the **dataset and its overview paper** (Satapara et al., FIRE 2021, CEUR Vol-3159 T1-2), not just the download URL.
+- **Data:** `pankajbiswas6/prism-hinglish-hate-speech` is **MIT** — fully open, attribution required, commercial use allowed, so the whole pipeline reproduces without a password.
+- Cite the **dataset card** and note its provenance (derived from a Kaggle `combined_hate_speech_dataset` compilation) in Limitations.
 
-## 11. References (shortlist — full list in the plan, §11)
+## 10. References (shortlist — full list in the plan, §11)
 
 - Satapara et al. (2021). *Overview of HASOC Subtrack at FIRE 2021: Conversational Hate Speech…* CEUR Vol-3159 T1-2.
 - Khanuja et al. (2021). *MuRIL: Multilingual Representations for Indian Languages.* arXiv:2103.10730.

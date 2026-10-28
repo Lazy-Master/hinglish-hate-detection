@@ -11,11 +11,12 @@ Each step lists its **expected runtime** and **hardware** so a reviewer can sani
 pip install -r requirements.txt
 ```
 
-## Step 1 — Data preparation (M1) · CPU · ~5 min
+## Step 1 — Data preparation (M1) · CPU · ~2 min
 ```bash
-python src/prepare_data.py --plan B --out data/processed/processed.csv
+python src/prepare_data.py --lang hinglish --out data/processed
 ```
-Produces `data/processed/processed.csv` (de-identified, conversation-grouped split).
+Downloads `pankajbiswas6/prism-hinglish-hate-speech` (MIT, ungated) and writes the processed splits.
+`--lang hinglish` keeps only the ~4.8K romanised code-mixed rows; omit it for the full 29.5K corpus.
 Records exact train/val/test counts and the split's sha256 in `data/processed/DATASET.md`.
 
 ## Step 2 — Baselines + floors (M2) · CPU · ~5 min
@@ -32,12 +33,10 @@ python src/advanced_a0.py --model google/muril-base-cased --seeds 42 43 44 \
 Saves `best_model/` (best seed by val Macro-F1) and appends A0 rows to `results/results.csv`.
 Training logs: `logs/a0_seed42.log` … `logs/a0_seed44.log`.
 
-## Step 4 — Ablation + control (M3) · GPU · ~1 h
+## Step 4 — Model control (M3) · GPU · ~30 min
 ```bash
-python src/advanced_a0.py --model google/muril-base-cased --seeds 42 --no-context \
-       --out results/results.csv          # A0-nocontext
 python src/advanced_a0.py --model xlm-roberta-base --seeds 42 \
-       --out results/results.csv           # A0-xlmr control
+       --out results/results.csv           # A0-XLM-R control
 ```
 
 ## Step 5 — Metrics, bootstrap CI, McNemar (M2) · CPU · ~15 min
