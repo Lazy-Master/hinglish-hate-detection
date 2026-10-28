@@ -1,9 +1,5 @@
 # Code-Mixed Hinglish Hate Speech Detection
 
-> **Context-aware hate-speech detection for romanised Hinglish (Hindi+English) social media text.**
-> A 7-day, 20-mark course activity comparing a classical baseline against a transformer model.
-> This repository is the shared workspace for the team — it is **private** and shared with all members.
-
 <p align="center">
   <img src="https://img.shields.io/badge/visibility-private-red?style=flat-square&logo=github&logoColor=white" alt="private"/>
   <img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python"/>
