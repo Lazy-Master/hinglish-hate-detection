@@ -115,7 +115,10 @@ See `REPRODUCE.md` for the authoritative, ordered command list with expected run
 
 - **Visibility:** Private repository (course activity).
 - **Owner:** `@Lazy-Master`
-- **Collaborators (write):** `@sohamvaidya333` — *[username inferred from sohamvaidya333@gmail.com; confirm]*
+- **Collaborators (write):** _pending_ — invite the GitHub account for `sohamvaidya333@gmail.com`. ⚠️ The handle `sohamvaidya333` does not exist, and `sohamvaidya` is an **organisation**, not a person, so GitHub rejects it as a collaborator. Confirm the person's real GitHub username, then run:
+  ```bash
+  gh api -X PUT repos/Lazy-Master/hinglish-hate-detection/collaborators/<USERNAME> -f permission=push
+  ```
 - **Workstreams:** M1 Data · M2 Baseline & stats · M3 Models · M4 Repo/demo/slides. See `CONTRIBUTING.md`.
 
 ## 9. AI-use statement
