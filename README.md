@@ -1,15 +1,16 @@
 # Code-Mixed Hinglish Hate Speech Detection
 
 <p align="center">
-  <img src="https://img.shields.io/badge/visibility-private-red?style=flat-square&logo=github&logoColor=white" alt="private"/>
   <img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python"/>
   <img src="https://img.shields.io/badge/PyTorch-2.4-EE4C2C?style=flat-square&logo=pytorch&logoColor=white" alt="PyTorch"/>
-  <img src="https://img.shields.io/badge/Model-MuRIL%20base%20cased-FF6F00?style=flat-square&logo=huggingface&logoColor=white" alt="MuRIL"/>
-  <img src="https://img.shields.io/badge/Dataset-CC--BY--NC--4.0-lightgrey?style=flat-square" alt="Dataset licence"/>
+  <img src="https://img.shields.io/badge/Models-HingRoBERTa%20%7C%20MuRIL%20%7C%20XLM--R-FF6F00?style=flat-square&logo=huggingface&logoColor=white" alt="Models"/>
+  <img src="https://img.shields.io/badge/Dataset-PRISM%20(MIT)-lightgrey?style=flat-square" alt="Dataset licence"/>
   <img src="https://img.shields.io/badge/Metric-Macro--F1-0969DA?style=flat-square" alt="Macro-F1"/>
 </p>
 
 **Stack:** Python · scikit-learn · PyTorch · Hugging Face Transformers · Gradio · pandas / NumPy · Matplotlib
+
+**Team:** Anish Charudatta Date (EN25552003) · Soham Nilesh Vaidya (EN25552017) — M.Tech II (AI & DS), VPKBIET Baramati · **Guide:** Dr. Arvind Jagtap
 
 ---
 
@@ -19,61 +20,65 @@ Social media in India is overwhelmingly **code-mixed**: a single post mixes Hind
 
 - romanisation shatters tokenisation and vocabulary coverage,
 - the *same* reply can be hateful or harmless depending on its **parent post** (conversational context),
-- available code-mixed datasets are small and noisy (HASOC ICHCL inter-annotator κ ≈ 0.47).
+- available code-mixed datasets are small and noisy.
 
 We frame the task as **binary hate detection on code-mixed Hinglish text**: label each post as **hate (1)** vs **non-hate (0)**. The open dataset we use ships single posts only — no parent thread — so conversational context is documented as **future work** rather than used here.
 
-## 2. The two models
+## 2. Models compared
 
 | | Model | Backbone | Input | Why |
 |---|---|---|---|---|
-| 🔵 **B0 (baseline)** | Char n-gram TF-IDF + Linear SVM | `TfidfVectorizer` + `LinearSVC` | post text only | Classical, GPU-free reference that survives romanisation/noise. Expect Macro-F1 ≈ 0.62–0.70 — **not a strawman**. |
-| 🟢 **A0 (advanced)** | MuRIL transformer (fine-tuned) | `google/muril-base-cased` (~178M) | post text | MuRIL is pretrained on Indian languages **including transliterated text** — our exact input distribution. |
+| 🔵 **B0 (baseline)** | Char $n$-gram TF-IDF + Linear SVM | `TfidfVectorizer` + `LinearSVC` | post text only | Classical, GPU-free reference that survives romanisation/noise — **not a strawman**. |
+| 🟢 **A0-a** | HingRoBERTa (fine-tuned) | `l3cube-pune/hing-roberta` (278M) | post text | Pretrained on romanised Hindi–English — our exact input distribution. |
+| 🟢 **A0-b** | MuRIL (fine-tuned) | `google/muril-base-cased` (238M) | post text | Pretrained on Indian languages **including transliterated text**. |
+| 🟢 **A0-c** | XLM-RoBERTa (fine-tuned) | `xlm-roberta-base` (278M) | post text | 100-language generalist; the strongest of the three on PRISM. |
 
-**Fairness contract** *(paste verbatim into the report §Methodology):*
-> *"Both models are trained and evaluated on the identical stratified split, using the same de-identification pipeline, the same decision-threshold policy (0.5, tuned only on the validation split), the same three random seeds, and the same held-out test set. The only differences between B0 and A0 are the representation learner and the classifier head, both of which are properties of the models under comparison rather than of the experimental setup."*
+**Fairness contract** *(identical to §Methodology of the report)*:
+
+> *"Both models are trained and evaluated on the identical stratified split, using the same de-identification pipeline, the same decision-threshold policy (tuned only on the validation split), the same three random seeds, and the same held-out test set. The only differences between B0 and A0 are the representation learner and the classifier head, both of which are properties of the models under comparison rather than of the experimental setup."*
 
 ## 3. Dataset
 
-**Dataset:** [`pankajbiswas6/prism-hinglish-hate-speech`](https://huggingface.co/datasets/pankajbiswas6/prism-hinglish-hate-speech) — **MIT licensed, ungated, open source**.
+**Dataset:** [`pankajbiswas6/prism-hinglish-hate-speech`](https://huggingface.co/datasets/pankajbiswas6/prism-hinglish-hate-speech) — **MIT licensed, ungated, open source**, revision pinned in the pipeline.
 
 | Attribute | Value |
 |---|---|
-| Licence | **MIT** — fully open, commercial use allowed, attribution required |
+| Licence | **MIT** — fully open, attribution required |
 | Access | Ungated · `load_dataset("pankajbiswas6/prism-hinglish-hate-speech")` |
 | Size | 29,506 rows — train 17,704 / val 2,950 / test 8,852 (**already split**) |
 | Columns | `text`, `label` (0 = non-hate, 1 = hate), `lang` (`english` / `hindi` / `hinglish`) |
 | Composition | English 15,000 · Hindi (Devanagari) 9,767 · **Hinglish 4,783** |
 | Balance | non-hate 53.5% / hate 46.5% |
 
-Two valid setups:
-- **Code-mixed only (recommended):** filter `lang == "hinglish"` → ~4.8K romanised rows, e.g. *"tum log terrorism ko support karna band kardo"*.
-- **Full corpus:** all 29.5K rows as a Hindi + English + Hinglish hate corpus.
+**De-identification (required):** `@handles` → `<USER>`, URLs → `<URL>`, email addresses and phone numbers → placeholders; unusually long repeated-letter sequences shortened; emojis **kept**. Raw downloads are **never** committed (see `.gitignore`).
 
-> **Provenance & honesty:** the dataset card states it is derived from a Kaggle `combined_hate_speech_dataset` compilation — it is **not** a peer-reviewed gold set like HASOC. Say this in Limitations. The trade-off is deliberate: it is **MIT and ungated**, so the whole pipeline reproduces with no password, which the project requires.
-> **No parent posts:** this dataset has no conversation threads, so the context-aware variant from the original plan is dropped (see §2).
+## 4. Evaluation
 
-**De-identification (required):** `@handles → <USER>`, URLs `→ <URL>`, names stripped; slurs masked (`b****d`) in all examples. Emojis are **kept**. Raw downloads are **never** committed (see `.gitignore`).
-
-## 4. Evaluation (4 criteria, not 6)
-
-1. **Effectiveness (primary):** Macro-F1 + per-class P/R/F1 (HASOC's official metric).
+1. **Effectiveness (primary):** macro-F1 + per-class P/R/F1.
 2. **Imbalance robustness:** MCC + balanced accuracy.
-3. **Statistical reliability:** Bootstrap 95% CI (1,000 resamples) + McNemar's test.
-4. **Cost:** train minutes · param count · ms/inference.
+3. **Statistical reliability:** bootstrap 95% CI (1,000 resamples) + exact McNemar's test with Holm correction.
+4. **Cost:** train seconds · parameter count · ms/inference.
 
-Plus **Figure 1**: a Macro-F1 bar chart with 95% CI error bars (majority-floor / B0 / A0 / A0-XLM-R).
+## 5. Results — final three-seed run
 
-## 5. Results (fill from `results/results.csv`)
+Test set = 8,852 held-out PRISM posts; values are mean ± std over seeds 42/43/44.
 
-| Model | Macro-F1 | MCC | Train time | ms/infer |
+| Model | Test macro-F1 | MCC | Train time / seed | ms/item |
 |---|---|---|---|---|
-| Majority floor | _TBD_ | _TBD_ | 0 | – |
-| **B0** TF-IDF + LinearSVC | _TBD_ | _TBD_ | < 2 min (CPU) | _TBD_ |
-| **A0** MuRIL (fine-tuned) | _TBD_ | _TBD_ | ~25 min (T4) | _TBD_ |
-| A0 with XLM-R (control) | _TBD_ | _TBD_ | ~30 min (T4) | _TBD_ |
+| **B0** TF-IDF + LinearSVC | **0.7050 ± 0.0000** | 0.4104 | 8.9 s | 0.50 |
+| HingRoBERTa | 0.7300 ± 0.0046 | 0.4639 | 856 s | 6.56 |
+| MuRIL | 0.7254 ± 0.0036 | 0.4582 | 823 s | 6.88 |
+| **XLM-RoBERTa** | **0.7351 ± 0.0064** | 0.4794 | 857 s | 6.60 |
 
-> Report as one sentence, e.g. *"A0 outperformed B0 by ΔMacro-F1 = +0.06 [95% CI 0.03–0.09]; McNemar χ² = 27.4, p < 0.001."* If not significant, **say so** — a null result is a finding, not a failure.
+> **Headline:** the best transformer (XLM-R) outperforms B0 by Δmacro-F1 = **+0.0301** [95% CI 0.7265–0.7439]; exact McNemar with Holm correction **p_adj = 1.2×10⁻¹³** (HingRoBERTa 7.5×10⁻⁹ · MuRIL 3.1×10⁻⁴) — all three gains significant.
+
+**Per-class behaviour (mean over seeds).** Hate recall is the weakest cell for *every* model — B0 0.670 · HingRoBERTa 0.667 · MuRIL 0.636 · XLM-R 0.645 — against non-hate recall of 0.740–0.824. Hate *precision* is best for XLM-R (0.762). The models are conservative: ambiguous posts are labelled non-hate, so moderation queues absorb the misses.
+
+**Per language (seed 42).** A0 macro-F1: English **0.8189** · Hinglish **0.6680** · Hindi **0.6233** (B0: 0.7723 / 0.6312 / 0.6215). The code-mixed bucket is the hardest: at seed 42, XLM-R misclassifies **32.0%** of the 1,214 posts in the 0.20–<0.50 mixing bucket.
+
+**Zero-shot transfer.** The validation-selected XLM-R model applied to **L3Cube-MeHate** (Marathi–English, 416 posts, threshold 0.53 carried from PRISM-val) reaches macro-F1 **0.3770** [95% CI 0.3454–0.4088] — a collapse of 35.81 points from 0.7351. Domain shift, not architecture, is the binding constraint.
+
+> **Note:** the numbers above are from the final executed run (Kaggle GPU notebook — the working demo, linked below) and match the 30-page report. The committed `results/results.csv` is being refreshed to carry these final three-seed values with the next code commit.
 
 ## 6. Repository layout
 
@@ -90,20 +95,20 @@ hinglish-hate-detection/
 ├── src/
 │   ├── prepare_data.py     ← M1: loader + PII stripper + stratified split
 │   ├── baseline_b0.py      ← M2: TF-IDF char 2-5gram + LinearSVC
-│   ├── advanced_a0.py      ← M3: MuRIL + context, 3 seeds
+│   ├── advanced_a0.py      ← M3: transformers, 3 seeds
 │   ├── evaluate.py         ← M2: metrics, bootstrap CI, McNemar
 │   ├── make_tables.py      ← M4: results.csv → tables + figures
 │   └── predict.py          ← M4: export model for inference
-├── results/results.csv     ← COMMITTED. Every report number traces here.
-├── figures/                ← committed PNGs for report & slides
+├── results/results.csv     ← every report number traces here (refresh in progress)
+├── figures/                ← generated PNGs for report & slides
 ├── app/app.py              ← M4: Gradio demo
 ├── notebooks/01_eda.ipynb
-├── report/main.pdf
-├── slides/presentation.pdf
-└── demo/demo_video.mp4
+├── report/                 ← submitted report (added at submission)
+└── slides/                 ← submitted presentation (added at submission)
 ```
 
-> **Every number in the report must appear in `results/results.csv`.** Every table/figure is generated by script, never hand-typed.
+**Working demo:** the fully executed Kaggle GPU notebook — every output and figure in the report — is available at
+[kaggle.com/code/anishdate/code-mixed-hate-speech-detection-pipeline-v2](https://www.kaggle.com/code/anishdate/code-mixed-hate-speech-detection-pipeline-v2).
 
 ## 7. How to run
 
@@ -113,8 +118,8 @@ pip install -r requirements.txt
 python src/prepare_data.py --lang hinglish --out data/processed
 # 2) Baseline (M2, CPU ~2 min)
 python src/baseline_b0.py --seeds 42 43 44 --out results/results.csv
-# 3) Advanced (M3, GPU ~25 min/seed)
-python src/advanced_a0.py --model google/muril-base-cased --seeds 42 43 44
+# 3) Transformers (M3, GPU)
+python src/advanced_a0.py --seeds 42 43 44
 # 4) Metrics + CI + McNemar (M2)
 python src/evaluate.py --preds results/ --out results/results.csv
 # 5) Tables + figures (M4)
@@ -127,25 +132,29 @@ See `REPRODUCE.md` for the authoritative, ordered command list with expected run
 
 ## 8. Team & access
 
-- **Visibility:** Private repository.
-- **Owner:** `@Lazy-Master`
-- **Collaborators (write):** `@SohamVaidya12` — **Soham Nilesh Vaidya** (`sohamvaidya333@gmail.com`), M.Tech AI&DS. Invite sent with **write** access. ✅
+- **Visibility:** private repository.
+- **Owner:** `@Lazy-Master` — **Anish Charudatta Date** (EN25552003).
+- **Collaborator (write):** `@SohamVaidya12` — **Soham Nilesh Vaidya** (EN25552017, `sohamvaidya333@gmail.com`). Invitation sent 28 Oct 2026 — pending acceptance.
+- **Guide:** Dr. Arvind Jagtap, Department of Computer Engineering, VPKBIET Baramati.
 - **Workstreams:** M1 Data · M2 Baseline & stats · M3 Models · M4 Repo/demo/slides. See `CONTRIBUTING.md`.
 
 ## 9. Licence
 
-- **Code:** _[to be decided — recommend MIT or Apache-2.0 for the submission]_.
-- **Data:** `pankajbiswas6/prism-hinglish-hate-speech` is **MIT** — fully open, attribution required, commercial use allowed, so the whole pipeline reproduces without a password.
+- **Code:** to be decided at submission (MIT or Apache-2.0 recommended).
+- **Data:** `pankajbiswas6/prism-hinglish-hate-speech` is **MIT** — attribution required, commercial use allowed, so the whole pipeline reproduces without a password.
 - Cite the **dataset card** and note its provenance (derived from a Kaggle `combined_hate_speech_dataset` compilation) in Limitations.
 
-## 10. References (shortlist — full list in the plan, §11)
+## 10. References
 
-- Satapara et al. (2021). *Overview of HASOC Subtrack at FIRE 2021: Conversational Hate Speech…* CEUR Vol-3159 T1-2.
 - Khanuja et al. (2021). *MuRIL: Multilingual Representations for Indian Languages.* arXiv:2103.10730.
-- Kakati & Dandotiya (2024). *…code-mixed Indian languages… DConvBLSTM-MuRIL ensemble.* SNAM 14(1):108. — peer-reviewed precedent for MuRIL on code-mixed hate.
-- Singh et al. (2025). *Rethinking Hate Speech Detection… Can LLMs Replace Traditional Models?* arXiv:2506.12744 — IndoHateMix; Future Work.
-- Sheth et al. (2026). *Beyond Monolingual Assumptions: A Survey on Code-Switched NLP…* ACL 2026.
+- Nayak & Joshi (2022). *L3Cube-HingCorpus and HingBERT.* WILDRE-6 @ LREC.
+- Conneau et al. (2020). *Unsupervised Cross-lingual Representation Learning at Scale.* ACL.
+- Pedregosa et al. (2011). *Scikit-learn: Machine Learning in Python.* JMLR 12.
+- Wolf et al. (2020). *Transformers: State-of-the-art Natural Language Processing.* EMNLP System Demos.
+- Efron & Tibshirani (1993). *An Introduction to the Bootstrap.* Chapman & Hall/CRC.
+- McNemar (1947). *Note on the sampling error of the difference between correlated proportions or percentages.* Psychometrika 12(2).
+- Holm (1979). *A simple sequentially rejective multiple test procedure.* Scand. J. Statist. 6.
 
 ---
 
-*Repository scaffold generated from the team's 7-day execution plan (prepared 28 Oct 2026). Fill placeholders as the 7-day schedule progresses; protect the Minimum Viable Submission (§3.2 of the plan) above all bonuses.*
+*Full citations, methodology and the complete result tables are in the submitted 30-page report; the presentation is submitted separately. This README documents the code that produces every number in them.*
