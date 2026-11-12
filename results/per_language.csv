@@ -1,0 +1,4 @@
+language,n_posts,b0_macro_f1,a0_macro_f1
+english,4545,0.7723,0.8189
+hindi,2900,0.6215,0.6233
+hinglish,1407,0.6312,0.6680

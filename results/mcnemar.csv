@@ -1,0 +1,4 @@
+comparison,transformer_right_b0_wrong,b0_right_transformer_wrong,p_exact,p_holm_adj,significant_at_0.05_holm
+A0 HingRoBERTa > B0,1263,980,2.491427e-09,7.474281e-09,True
+A0 MuRIL > B0,1094,919,1.042699e-04,3.128096e-04,True
+A0 XLM-R > B0,1181,841,4.142310e-14,1.242693e-13,True

@@ -78,7 +78,22 @@ Test set = 8,852 held-out PRISM posts; values are mean ± std over seeds 42/43/4
 
 **Zero-shot transfer.** The validation-selected XLM-R model applied to **L3Cube-MeHate** (Marathi–English, 416 posts, threshold 0.53 carried from PRISM-val) reaches macro-F1 **0.3770** [95% CI 0.3454–0.4088] — a collapse of 35.81 points from 0.7351. Domain shift, not architecture, is the binding constraint.
 
-> **Note:** the numbers above are from the final executed run (Kaggle GPU notebook — the working demo, linked below) and match the 30-page report. The committed `results/results.csv` is being refreshed to carry these final three-seed values with the next code commit.
+> **Note:** the numbers above are from the final executed run (Kaggle GPU notebook — the working demo, linked below) and match the 30-page report. Machine-readable copies of every table live in [`results/`](results/).
+
+
+### Figures
+
+<p align="center"><img src="figures/fig1_macro_f1_ci.png" width="640" alt="Macro-F1 with 95% bootstrap confidence intervals"/></p>
+<p align="center"><em>Test macro-F1 with 95% bootstrap confidence intervals (1,000 resamples).</em></p>
+
+<p align="center"><img src="figures/fig_per_class.png" width="640" alt="Per-class precision, recall and F1"/></p>
+<p align="center"><em>Per-class behaviour: hate recall is the weakest cell for every model.</em></p>
+
+<p align="center"><img src="figures/fig_confusion.png" width="520" alt="Confusion matrices"/></p>
+<p align="center"><em>Confusion matrices on the PRISM test set (seed 42).</em></p>
+
+<p align="center"><img src="figures/fig_transfer.png" width="440" alt="Zero-shot transfer to MeHate"/></p>
+<p align="center"><em>Zero-shot transfer: PRISM (Hindi–English) vs MeHate (Marathi–English).</em></p>
 
 ## 6. Repository layout
 
@@ -97,8 +112,8 @@ hinglish-hate-detection/
 │   ├── evaluate.py         ← M2: metrics, bootstrap CI, McNemar
 │   ├── make_tables.py      ← M4: results.csv → tables + figures
 │   └── predict.py          ← M4: export model for inference
-├── results/results.csv     ← every report number traces here (refresh in progress)
-├── figures/                ← generated PNGs for report & slides
+├── results/                ← results.csv + summary, per-class, McNemar, per-language and transfer tables
+├── figures/                ← 11 figure PNGs from the final run (four embedded below)
 ├── app/app.py              ← M4: Gradio demo
 ├── notebooks/01_eda.ipynb
 ├── report/                 ← submitted report (added at submission)

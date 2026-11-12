@@ -1,0 +1,9 @@
+model,class,precision,recall,f1
+B0 TF-IDF+SVM,hate,0.691,0.670,0.680
+B0 TF-IDF+SVM,non-hate,0.721,0.740,0.730
+A0 HingRoBERTa,hate,0.736,0.667,0.699
+A0 HingRoBERTa,non-hate,0.733,0.792,0.761
+A0 MuRIL,hate,0.747,0.636,0.687
+A0 MuRIL,non-hate,0.720,0.813,0.764
+A0 XLM-R,hate,0.762,0.645,0.697
+A0 XLM-R,non-hate,0.729,0.824,0.773
