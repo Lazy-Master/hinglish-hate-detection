@@ -127,21 +127,7 @@ python app/app.py
 ```
 
 
-## 8. Team & access
-
-- **Visibility:** private repository.
-- **Owner:** `@Lazy-Master` — **Anish Charudatta Date** (EN25552003).
-- **Collaborator (write):** `@SohamVaidya12` — **Soham Nilesh Vaidya** (EN25552017, `sohamvaidya333@gmail.com`). Invitation sent 28 Oct 2026 — pending acceptance.
-- **Guide:** Dr. Arvind Jagtap, Department of Computer Engineering, VPKBIET Baramati.
-- **Workstreams:** M1 Data · M2 Baseline & stats · M3 Models · M4 Repo/demo/slides.
-
-## 9. Licence
-
-- **Code:** to be decided at submission (MIT or Apache-2.0 recommended).
-- **Data:** `pankajbiswas6/prism-hinglish-hate-speech` is **MIT** — attribution required, commercial use allowed, so the whole pipeline reproduces without a password.
-- Cite the **dataset card** and note its provenance (derived from a Kaggle `combined_hate_speech_dataset` compilation) in Limitations.
-
-## 10. References
+## 8. References
 
 - Khanuja et al. (2021). *MuRIL: Multilingual Representations for Indian Languages.* arXiv:2103.10730.
 - Nayak & Joshi (2022). *L3Cube-HingCorpus and HingBERT.* WILDRE-6 @ LREC.
