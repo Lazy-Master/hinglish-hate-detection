@@ -81,43 +81,29 @@ Test set = 8,852 held-out PRISM posts; values are mean ± std over seeds 42/43/4
 > **Note:** the numbers above are from the final executed run (Kaggle GPU notebook — the working demo, linked below) and match the 30-page report. Machine-readable copies of every table live in [`results/`](results/).
 
 
-### Figures
-
-<p align="center"><img src="figures/fig1_macro_f1_ci.png" width="640" alt="Macro-F1 with 95% bootstrap confidence intervals"/></p>
-<p align="center"><em>Test macro-F1 with 95% bootstrap confidence intervals (1,000 resamples).</em></p>
-
-<p align="center"><img src="figures/fig_per_class.png" width="640" alt="Per-class precision, recall and F1"/></p>
-<p align="center"><em>Per-class behaviour: hate recall is the weakest cell for every model.</em></p>
-
-<p align="center"><img src="figures/fig_confusion.png" width="520" alt="Confusion matrices"/></p>
-<p align="center"><em>Confusion matrices on the PRISM test set (seed 42).</em></p>
-
-<p align="center"><img src="figures/fig_transfer.png" width="440" alt="Zero-shot transfer to MeHate"/></p>
-<p align="center"><em>Zero-shot transfer: PRISM (Hindi–English) vs MeHate (Marathi–English).</em></p>
-
 ## 6. Repository layout
 
 ```
 hinglish-hate-detection/
-├── README.md               ← you are here
-├── requirements.txt        ← pinned versions
+├── README.md
+├── requirements.txt
 ├── .gitignore
 ├── data/
-│   ├── raw/                ← downloaded raw data (gitignored)
-│   └── processed/          ← de-identified CSV + DATASET.md (sha256)
+│   ├── raw/
+│   └── processed/
 ├── src/
-│   ├── prepare_data.py     ← M1: loader + PII stripper + stratified split
-│   ├── baseline_b0.py      ← M2: TF-IDF char 2-5gram + LinearSVC
-│   ├── advanced_a0.py      ← M3: transformers, 3 seeds
-│   ├── evaluate.py         ← M2: metrics, bootstrap CI, McNemar
-│   ├── make_tables.py      ← M4: results.csv → tables + figures
-│   └── predict.py          ← M4: export model for inference
-├── results/                ← results.csv + summary, per-class, McNemar, per-language and transfer tables
-├── figures/                ← 11 figure PNGs from the final run (four embedded below)
-├── app/app.py              ← M4: Gradio demo
+│   ├── prepare_data.py
+│   ├── baseline_b0.py
+│   ├── advanced_a0.py
+│   ├── evaluate.py
+│   ├── make_tables.py
+│   └── predict.py
+├── results/
+├── figures/
+├── app/app.py
 ├── notebooks/01_eda.ipynb
-├── report/                 ← submitted report (added at submission)
-└── slides/                 ← submitted presentation (added at submission)
+├── report/
+└── slides/
 ```
 
 **Working demo:** the fully executed Kaggle GPU notebook — every output and figure in the report — is available at
