@@ -85,9 +85,7 @@ Test set = 8,852 held-out PRISM posts; values are mean ± std over seeds 42/43/4
 ```
 hinglish-hate-detection/
 ├── README.md               ← you are here
-├── REPRODUCE.md            ← exact commands, in order, with expected runtime
 ├── requirements.txt        ← pinned versions
-├── CONTRIBUTING.md         ← contribution matrix: who did what (MVP evidence)
 ├── .gitignore
 ├── data/
 │   ├── raw/                ← downloaded raw data (gitignored)
@@ -128,7 +126,6 @@ python src/make_tables.py --csv results/results.csv --out figures/
 python app/app.py
 ```
 
-See `REPRODUCE.md` for the authoritative, ordered command list with expected runtimes.
 
 ## 8. Team & access
 
@@ -136,7 +133,7 @@ See `REPRODUCE.md` for the authoritative, ordered command list with expected run
 - **Owner:** `@Lazy-Master` — **Anish Charudatta Date** (EN25552003).
 - **Collaborator (write):** `@SohamVaidya12` — **Soham Nilesh Vaidya** (EN25552017, `sohamvaidya333@gmail.com`). Invitation sent 28 Oct 2026 — pending acceptance.
 - **Guide:** Dr. Arvind Jagtap, Department of Computer Engineering, VPKBIET Baramati.
-- **Workstreams:** M1 Data · M2 Baseline & stats · M3 Models · M4 Repo/demo/slides. See `CONTRIBUTING.md`.
+- **Workstreams:** M1 Data · M2 Baseline & stats · M3 Models · M4 Repo/demo/slides.
 
 ## 9. Licence
 
