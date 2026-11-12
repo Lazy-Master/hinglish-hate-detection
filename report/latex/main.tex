@@ -1,0 +1,271 @@
+\documentclass[11pt,a4paper]{report}
+
+% ---------- fonts & encoding (match the reference report: Latin Modern via XeTeX) ----------
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+% ---------- core packages ----------
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage[a4paper,top=28mm,bottom=28mm,left=28mm,right=28mm,
+            headheight=15pt,headsep=8mm,footskip=12mm]{geometry}
+\usepackage{setspace}
+\usepackage{booktabs}
+\setlength{\tabcolsep}{5pt}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{caption}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{needspace}
+\usepackage{titlesec}
+\titlespacing*{\chapter}{0pt}{18pt}{16pt}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
+\usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=blue,
+            bookmarks=true,bookmarksnumbered=true]{hyperref}
+\usepackage{microtype}
+
+% ---------- layout ----------
+\setstretch{1.08}
+\setlength{\parskip}{1pt}
+\tolerance=2000
+\emergencystretch=1.5em
+\widowpenalty=10000
+\clubpenalty=10000
+\setcounter{tocdepth}{0}
+\setcounter{secnumdepth}{2}
+\captionsetup{labelfont=bf,font=small,skip=5pt}
+\setlist{itemsep=2pt,topsep=3pt,parsep=0pt}
+\setlength{\textfloatsep}{13pt plus 2pt minus 4pt}
+\setlength{\intextsep}{13pt plus 2pt minus 4pt}
+\setlength{\floatsep}{11pt plus 2pt minus 3pt}
+
+% ---------- headers & footers (same style as the reference report) ----------
+\newcommand{\shorttitle}{Code-Mixed Hate Speech Detection in Hinglish: A Comparative Study of a TF-IDF Baseline and Three Multilingual Transformers}
+\renewcommand{\chaptermark}[1]{\markboth{\MakeUppercase{\chaptername}\ \thechapter.\ \ #1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\MakeUppercase{\thesection}.\ \ #1}}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\footnotesize\itshape\leftmark}
+\fancyhead[R]{\footnotesize\itshape\rightmark}
+
+\fancyfoot[L]{\footnotesize
+  Hinglish Hate Speech Detection:\\
+  TF-IDF vs. Multilingual Transformers}
+
+\fancyfoot[C]{\thepage}
+\fancyfoot[R]{\footnotesize VPKBIET, Baramati}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\fancypagestyle{plain}{%
+  \fancyhf{}%
+  \fancyfoot[C]{\thepage}%
+  \renewcommand{\headrulewidth}{0pt}%
+  \renewcommand{\footrulewidth}{0pt}%
+}
+
+% ---------- unnumbered chapter with TOC entry ----------
+\newcommand{\frontchapter}[1]{%
+  \chapter*{#1}\markboth{#1}{}\addcontentsline{toc}{chapter}{#1}}
+
+% ---------- math shortcuts ----------
+\newcommand{\mF}{F_{1}}
+\newcommand{\mFmac}{F_{1}^{\mathrm{macro}}}
+
+\renewcommand{\bibname}{References}
+
+% ---------- PDF metadata ----------
+\hypersetup{
+  pdftitle={Mini Project Report on Code-Mixed Hate Speech Detection in Hinglish: A Comparative Study of a TF-IDF Baseline and Three Multilingual Transformers},
+  pdfauthor={Anish Charudatta Date},
+  pdfsubject={Deep Learning Mini Project Report, VPKBIET Baramati},
+  pdfkeywords={Hate Speech Detection, Hinglish, Code-Mixed, TF-IDF, Transformer, RoBERTa, MuRIL, XLM-R, Macro-F1, McNemar}
+}
+
+\begin{document}
+
+% =====================================================================
+% TITLE PAGE
+% =====================================================================
+\begin{titlepage}
+\centering
+\includegraphics[width=34mm]{vpkbiet_logo.jpg}\par
+\vspace{7mm}
+{\large Mini Project Report on\par}
+\vspace{4mm}
+{\sffamily\bfseries\fontsize{19}{25}\selectfont
+Hinglish Hate Speech Detection:\\
+TF-IDF vs. Multilingual Transformers\par}
+\vspace{12mm}
+{\large Submitted in fulfillment of activity requirements\\
+in the subject \textbf{Natural Language Processing}\par}
+\vspace{7mm}
+{\large BY\par}
+\vspace{2mm}
+{\large\bfseries Soham Nilesh Vaidya\par}
+{\large\bfseries (Roll No.\ EN25552017)\par}
+\vspace{2mm}
+{\large\bfseries Anish Charudatta Date\par}
+{\large\bfseries (Roll No.\ EN25552003)\par}
+\vspace{7mm}
+{\large Under the guidance of\par}
+{\large Dr.\ Arvind\ Jagtap\par}
+\par\vspace{10mm}
+{\large Vidya Pratishthan's\\
+Kamalnayan Bajaj Institute of Engineering and Technology\\
+Baramati-413133, Dist-Pune (M.S.) India\\
+Department of Computer Engineering\\[3mm]
+November 2026-27\par}
+\end{titlepage}
+
+% =====================================================================
+% CERTIFICATE
+% =====================================================================
+\pagenumbering{roman}
+\thispagestyle{plain}
+\noindent\rule{\textwidth}{0.4pt}\par
+\vspace{5mm}
+\begin{center}
+\includegraphics[width=30mm]{vpkbiet_logo.jpg}\par
+\vspace{2mm}
+VPKBIET, Baramati\par
+\vspace{5mm}
+{\Huge\boldmath$\mathfrak{Certificate}$\par}
+\vspace{7mm}
+This is to certify that the Mini Project Report on\par
+\vspace{3mm}
+{\sffamily\bfseries\large
+Code-Mixed Hate Speech Detection in Hinglish:\\
+A Comparative Study of a TF-IDF Baseline and\\
+Three Multilingual Transformers\par}
+\vspace{4mm}
+submitted by\par
+\vspace{2mm}
+{\bfseries Soham Nilesh Vaidya\par}
+{\bfseries Roll No.\ EN25552017\par}
+\vspace{4mm}
+\begin{minipage}{0.88\textwidth}
+in fulfillment of the activity requirements in the subject Natural Language Processing at Vidya
+Pratishthan's Kamalnayan Bajaj Institute of Engineering and Technology, Baramati,
+under the Savitribai Phule Pune University, Pune. This work is done during year
+2026-27 Semester-III, under our guidance.
+\end{minipage}\par
+\end{center}
+\vspace{16mm}
+\noindent
+\begin{tabular}{@{}p{0.42\textwidth}@{\hspace{0.04\textwidth}}p{0.23\textwidth}@{\hspace{0.04\textwidth}}p{0.23\textwidth}@{}}
+ Dr.\ Arvind\ Jagtap & Dr.\ A.M.\ Jagtap & Dr.\ S.B.\ Lande\\[9mm]
+Mini Project Guide & Head of Dept. & Principal\\
+\end{tabular}
+\vspace{16mm}
+
+\noindent Examiner 1: \hrulefill \hfill Examiner 2: \hrulefill
+\newpage
+
+% =====================================================================
+% FRONT MATTER
+% =====================================================================
+\pagenumbering{arabic}
+
+\frontchapter{Acknowledgements}
+I would like to express my sincere gratitude to my mini project guide,
+Dr.\ Arvind Jagtap, for his continuous guidance, patient review and
+constructive criticism throughout this work. I am grateful to the Department of
+Computer Engineering for providing the computational facilities that made the
+experiments possible. I also thank Dr.\ A.\,M.\ Jagtap, Head of the Department of
+Computer Engineering, Dr.\ S.\,B.\ Lande, Principal of VPKBIET, and all the faculty
+members of the department, for their support and encouragement.
+
+I thank the creators and maintainers of the PRISM Hinglish hate-speech dataset and
+of the L3Cube-MeHate Marathi dataset, the L3Cube-Pune group and Google Research for
+releasing the pretrained Hinglish and Indian-language models, and the Hugging Face,
+\texttt{transformers} and scikit-learn communities, without whose open-source tools
+this study could not have been carried out. I also thank Kaggle for providing the
+GPU quota used for training. Finally, I thank my classmates for their comments
+during the preparation of this report.
+
+\frontchapter{Abstract}
+\begingroup\footnotesize\setstretch{1.12}
+Hate speech on Indian social media rarely arrives in pure English or pure Hindi:
+it arrives as Hinglish---Hindi written in the Roman script, mixed with English in
+the same sentence---and its non-standard spelling defeats word-level NLP tooling.
+This report presents a controlled, reproducible comparison of four classifiers for
+binary hate-speech detection on such code-mixed text: a lexical baseline built on
+character $n$-gram TF-IDF features with a linear SVM (B0), and three fine-tuned
+transformers spanning the pretraining spectrum---HingRoBERTa (romanised
+Hindi--English), MuRIL (Indian languages) and XLM-RoBERTa (100-language generalist).
+The experiments use the PRISM corpus (17{,}704 / 2{,}950 / 8{,}852 train,
+validation and test posts, about 53.5\% non-hate) with the upstream revision pinned
+and a data card written for every split. All four models share one protocol: three
+seeds, macro-F1 as the single primary metric, the decision threshold tuned on the
+validation set only, and the test set used exclusively for reporting; bootstrap
+confidence intervals and Holm-corrected McNemar tests quantify uncertainty.
+
+The result is a clear but modest gain for pretraining. The baseline reaches a test
+macro-F1 of 0.7050; the three transformers reach 0.7300, 0.7254 and 0.7351
+(HingRoBERTa, MuRIL and XLM-R respectively), so the best transformer buys about
+three F1 points over the baseline while training roughly 96 times longer, and all
+three gains are significant under McNemar with Holm correction (best
+$p_{\mathrm{adj}} = 1.2\times10^{-13}$). The best backbone (XLM-R) is selected on the
+validation set, so the reported test numbers carry no model-selection bias. The
+error analysis locates the remaining weaknesses precisely: hate-class recall is the
+lowest cell of the confusion matrix (0.645 for XLM-R), the code-mixed bucket of the
+test set shows a 32.0\% error rate, and zero-shot transfer to Marathi--English
+(L3Cube-MeHate) collapses macro-F1 from 0.7351 to 0.3770. The report closes with
+a glossary appendix explaining every metric and term used.
+\endgroup
+
+{\let\clearpage\relax\chapter*{Keywords}\markboth{Keywords}{}\addcontentsline{toc}{chapter}{Keywords}}
+\vspace{-2mm}
+\noindent\textbf{Keywords---} Hate Speech Detection; Code-Mixed Language; Hinglish;
+Text Classification; TF-IDF; Linear SVM; Transformer; HingRoBERTa; MuRIL; XLM-RoBERTa;
+Fine-Tuning; Macro-F1; McNemar's Test; Bootstrap Confidence Interval; Zero-Shot Transfer.
+
+\vspace{5mm}
+\noindent\textbf{Abbreviations---} B0 (baseline model), A0 (advanced transformer
+models), CI (confidence interval), EDA (exploratory data analysis), fp16
+(16-bit floating point), GPU (graphics processing unit), HF (Hugging Face),
+MCC (Matthews correlation coefficient), NLP (natural language processing),
+PII (personally identifiable information), SVM (support vector machine),
+TF-IDF (term frequency--inverse document frequency).
+
+% =====================================================================
+% CONTENTS
+% =====================================================================
+% CONTENTS
+% =====================================================================
+\begingroup
+\footnotesize
+\setstretch{1.0}
+\setlength{\parskip}{0pt}
+
+\setcounter{tocdepth}{1}
+\tableofcontents
+
+\clearpage
+\listoftables
+
+\listoffigures
+\endgroup
+
+% =====================================================================
+% CHAPTERS
+% =====================================================================
+\input{ch1}
+\input{ch2}
+\input{ch3}
+\input{ch5}
+
+% =====================================================================
+% REFERENCES
+% =====================================================================
+\input{refs}
+
+% =====================================================================
+% APPENDIX
+% =====================================================================
+\input{glossary}
+
+\end{document}

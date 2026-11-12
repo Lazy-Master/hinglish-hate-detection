@@ -1,0 +1,239 @@
+% =====================================================================
+% APPENDIX A — GLOSSARY OF TERMS
+% =====================================================================
+\appendix
+\chapter{Glossary of Terms}
+\label{app:glossary}
+\begingroup\small\setstretch{1.0}
+
+This appendix explains every technical term used in the report, in the order a
+newcomer is likely to meet it: first the task and the language phenomenon, then
+the models and their training, then the evaluation metrics---with their
+formulas---and finally the statistical machinery that turns scores into claims.
+Each entry is written to be self-contained; no entry assumes another.
+
+\vspace{4pt}
+\noindent\textbf{Code and demo availability.} The complete pipeline, the executed
+notebook and all artifacts (result tables, figures, run manifest and
+requirements freeze) are maintained in the project's GitHub repository with
+regular commits from both team members. The working demo---the fully executed
+Kaggle notebook, including every output and figure in this report---is available
+at \url{https://www.kaggle.com/code/anishdate/code-mixed-hate-speech-detection-pipeline-v2}.
+
+\section{Task and Language Terms}
+\label{app:task}
+
+\textbf{Hate speech detection.} The classification task, given a post, of deciding
+whether it expresses hate or attacks a person or group (label 1, \emph{hate}) or
+does not (label 0, \emph{non-hate}). This study uses the binary form; datasets
+that distinguish target groups or severity are outside its scope.
+
+\textbf{Code-mixed language.} Text in which two or more languages alternate
+within the same sentence or phrase, without typographic separation---from a single
+borrowed word to a full clause switch; the ``mixing index'' entry below gives the
+measure used here.
+
+\textbf{Hinglish.} The Hindi--English code-mixed register dominant on Indian
+social media: Hindi written in the Roman script (``romanised Hindi''), freely
+interspersed with English words. Written Hindi normally uses the Devanagari
+script; the Roman-script form has no standard spelling.
+
+\textbf{Romanisation.} Writing a non-Latin script with Latin letters. Because it
+is done by ear, one Hindi word acquires many spellings (\emph{hai}, \emph{hain},
+\emph{he}, \emph{hn})---the main reason word-level vocabularies fragment and
+character-level or subword models cope better.
+
+\textbf{De-identification.} Removing personal information from text before
+analysis: here, replacing URLs, email addresses, phone numbers and @handles with
+placeholders, and collapsing letter elongation. Regex-based de-identification does
+not catch plain-text names (Table~\ref{tab:limits}).
+
+\textbf{PII.} Personally identifiable information: names, handles, phone numbers,
+addresses and similar data that can identify a person.
+
+\textbf{Data card.} A metadata file written next to a processed dataset,
+recording its source, revision, licence, split sizes and preprocessing rules, so
+that the data behind an experiment is auditable.
+
+\textbf{Class imbalance.} A mismatch between the number of examples of each
+class. PRISM is mildly imbalanced (53.5\% / 46.5\%), which is why macro-averaged
+metrics are preferred over raw accuracy.
+
+\section{Models and Training Terms}
+\label{app:models}
+
+\textbf{TF-IDF.} Term frequency--inverse document frequency. A way of turning text
+into numbers: each feature counts how often a term occurs in a post (TF), down-weighted
+by how common the term is across all posts (IDF), so that ubiquitous words carry
+little signal.
+
+\textbf{Character $n$-gram.} A substring of $n$ consecutive characters
+(\emph{hain} contains the 3-grams \emph{hai} and \emph{ain}). Char $n$-grams
+match misspelled and romanised variants through shared substrings and need no
+dictionary---the reason the B0 baseline uses them with $n$ from 2 to 5.
+
+\textbf{Linear SVM.} A linear support vector machine: it learns a weighted
+combination of features and classifies by the sign of the score. It has no
+probability output (hence no threshold to tune) and trains in seconds.
+
+\textbf{Baseline.} A deliberately simple reference model that defines the score a
+new method must beat. B0 (TF-IDF + SVM) plays this role: without it, a
+transformer's three-point gain would have no costed reference point.
+
+\textbf{Transformer.} The neural architecture underlying modern NLP: all tokens
+are processed in parallel through stacked blocks of self-attention and
+feed-forward layers, trained by gradient descent.
+
+\textbf{Self-attention.} The mechanism by which every token computes a weighted
+view of every other token, letting the model connect, say, a pronoun with the
+noun it refers to several words away.
+
+\textbf{Pretrained language model.} A transformer that has already been trained on
+a large unlabelled corpus and therefore knows spelling, syntax and some world
+knowledge before the task-specific training starts. HingRoBERTa, MuRIL and XLM-R
+are three such models with different pretraining corpora.
+
+\textbf{Fine-tuning.} Continuing to train a pretrained model on a small labelled
+dataset (here: 17{,}704 posts, 3 epochs) so that its general language knowledge is
+re-pointed at the task. All transformer results here are fine-tuned models.
+
+\textbf{Classification head.} The small layer added on top of a pretrained
+encoder that maps its output to the two class scores. It starts from random
+weights and is trained together with (or on top of) the encoder.
+
+\textbf{Epoch, batch, learning rate.} One \emph{epoch} is a pass over the
+training data; training proceeds in \emph{batches} of 32 posts; the \emph{learning
+rate} ($2\times10^{-5}$) is the optimiser's step size.
+
+\textbf{Warmup and weight decay.} \emph{Warmup} (ratio 0.1) raises the learning
+rate gradually over the first 10\% of steps, avoiding instability at the start;
+\emph{weight decay} (0.01) penalises large weights, a mild regulariser.
+
+\textbf{fp16 (mixed precision).} Storing and multiplying most network values in
+16-bit instead of 32-bit floats, roughly halving GPU memory and speeding up
+training. Small numerical differences remain, which is why seeds are described as
+``reproducible in practice'' rather than bit-exact.
+
+\textbf{Seed.} The number that starts all pseudo-random processes (weight
+initialisation, shuffling, dropout). Re-running with seeds 42, 43, 44 measures
+how much of the score is luck.
+
+\textbf{Checkpoint.} A snapshot of the model saved during training. The pipeline
+saves one per epoch and restores the one with the best \emph{validation} macro-F1,
+not the final one.
+
+\section{Evaluation Metrics}
+\label{app:metrics}
+
+All metrics are computed on a \textbf{confusion matrix}, the $2\times2$ table of
+predicted vs.\ true classes. For the hate class: TP = hate posts predicted hate,
+FP = non-hate posts predicted hate (false alarms), FN = hate posts predicted
+non-hate (misses), TN = non-hate posts predicted non-hate.
+
+\textbf{Precision} (per class) answers: ``of the posts the model called hate, how
+many really were?''
+\begin{equation}
+\mathrm{Precision}_{c} = \frac{TP_{c}}{TP_{c} + FP_{c}}
+\end{equation}
+
+\textbf{Recall} (per class) answers: ``of the posts that really were hate, how
+many did the model catch?''
+\begin{equation}
+\mathrm{Recall}_{c} = \frac{TP_{c}}{TP_{c} + FN_{c}}
+\end{equation}
+
+\textbf{F1} (per class) is the harmonic mean of the two---a class scores well on
+F1 only if both precision and recall are high:
+\begin{equation}
+F_{1,c} = \frac{2\,\mathrm{Precision}_{c}\cdot\mathrm{Recall}_{c}}
+               {\mathrm{Precision}_{c} + \mathrm{Recall}_{c}}
+\end{equation}
+
+\textbf{Macro-F1}---the primary metric of this report---is the unweighted average
+of the per-class F1 over the $C$ classes ($C=2$ here):
+\begin{equation}
+\mFmac = \frac{1}{C}\sum_{c=1}^{C} F_{1,c}
+\end{equation}
+``Macro'' means each class counts equally. A model that is excellent on the large
+class and useless on the small one gets a low macro-F1, which is exactly the
+sensitivity wanted for hate speech: missing the hate class must cost as much as
+failing on non-hate. This is why a 99\% accuracy on 99\% non-hate data would be
+worthless, while macro-F1 would expose it as near zero.
+
+\textbf{Macro precision / macro recall} apply the same unweighted averaging to
+precision and recall. They are reported so that a macro-F1 change can be traced
+to fewer false alarms (precision up) or fewer misses (recall up).
+
+\textbf{MCC --- Matthews correlation coefficient.} A single-number summary of the
+whole confusion matrix that is robust to imbalance, ranging from $-1$ (always
+wrong) through 0 (random) to $+1$ (perfect):
+\begin{equation}
+\mathrm{MCC} =
+\frac{TP\cdot TN - FP\cdot FN}
+     {\sqrt{(TP+FP)(TP+FN)(TN+FP)(TN+FN)}}
+\end{equation}
+
+\textbf{Balanced accuracy} is the average of the two class recalls:
+\begin{equation}
+\mathrm{Balanced\ accuracy} = \tfrac{1}{2}\left(\frac{TP}{TP+FN} + \frac{TN}{TN+FP}\right)
+\end{equation}
+It ignores precision entirely, so comparing it with macro-F1 shows how much of a
+model's quality comes from precision (fewer false alarms).
+
+\textbf{Support.} The number of true examples of a class in the evaluated set.
+Per-class scores are read against their support: the highly-mixed bucket of
+Table~\ref{tab:buckets} carries only 72 posts, which is why its numbers move
+widely.
+
+\textbf{Decision threshold.} Transformers output a probability $p$ that a post is
+hate; the \emph{threshold} $t$ turns it into a decision (hate if $p \geq t$).
+The default $t = 0.5$ is a convention, not an optimum; this study tunes $t$ on
+the validation set (\S\ref{sec:protocol}).
+
+\clearpage
+\section{Statistical and Protocol Terms}
+\label{app:stats}
+
+\textbf{Bootstrap confidence interval (CI).} A measure of how much a reported
+number would wobble if the test set were redrawn. The test set is resampled with
+replacement 1{,}000 times, the metric recomputed on each resample, and the 2.5th
+and 97.5th percentiles form the 95\% CI. Within each resample the three seeds are
+averaged, so the interval surrounds the plotted 3-seed mean.
+
+\textbf{Seed variance / standard deviation.} The spread of a metric across seeds
+42, 43, 44. It measures training luck, not test-set luck; both must be small
+before two models can be ranked.
+
+\textbf{McNemar's test.} A significance test for two models on the same items;
+only the \emph{discordant} pairs matter---items where exactly one model is
+correct. Under the null hypothesis ``both are equally good'', the split
+$n_{10}$ vs.\ $n_{01}$ is a fair coin toss, and the exact binomial test on
+$\min(n_{01}, n_{10})$ out of $n_{01}+n_{10}$ gives the $p$-value. It is the
+correct paired test here because both models label the identical 8{,}852 posts.
+
+\textbf{$p$-value.} The probability, assuming two models are in fact equally
+good, of seeing a discrepancy at least as large as the observed one. A small
+$p$-value is evidence \emph{against} equality, not a proof of importance.
+
+\textbf{Holm correction.} When several hypotheses are tested at once (here: three
+transformers each vs.\ the baseline), the chance of a false ``significant'' grows.
+The Holm procedure orders the $p$-values and multiplies the $i$-th smallest by
+$(m - i + 1)$, capping at 1, which keeps the family-wise error rate at the nominal
+level. All ``significant'' claims in this report use Holm-adjusted $p$-values.
+
+\textbf{Zero-shot transfer.} Applying a model to a domain or language it was never
+trained on---here, the PRISM-trained model applied to Marathi--English posts with
+no retraining and the same threshold. The 0.3770 result shows the term is not a
+formality: zero-shot can fail completely.
+
+\textbf{Data leakage.} Any route by which information from the test set influences
+training or model selection, inflating reported scores. The v1$\rightarrow$v2 fix
+(\S\ref{sec:protocol}) removed one concrete route: selecting the backbone on test
+macro-F1.
+
+\textbf{Validation set / test set.} The validation set (2{,}950 posts) is the
+``exam for feedback'': all tuning and selection decisions read it. The test set
+(8{,}852 posts) is the ``final exam'', touched once per seed for reporting.
+Keeping the channels separate is what makes the reported numbers mean what they
+claim.
+\endgroup

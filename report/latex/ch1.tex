@@ -1,0 +1,146 @@
+% =====================================================================
+% CHAPTER 1 — INTRODUCTION
+% =====================================================================
+\chapter{Introduction}
+\label{ch:intro}
+
+\section{Research Background}
+\label{sec:background}
+
+Automatic moderation of abusive content is now a first-class requirement for
+large social platforms, and its classical research formulation is hate-speech
+detection: given a post, decide whether it contains hateful or attacking
+language. On Indian platforms the task has a complication that most published
+benchmarks barely address---the language itself. A large share of posts are
+written in \emph{Hinglish}: Hindi expressed in the Roman script, freely mixed
+with English inside the same sentence---\emph{``yeh kya bakwaas hai yaar''} in
+one clause, English in the next, with no script boundary to mark the change.
+
+This mixing is hostile to standard text pipelines in three concrete ways.
+First, romanisation is non-phonetic: the same Hindi word appears as \emph{hai},
+\emph{hain}, \emph{he} or \emph{hn}, so a word-level vocabulary fragments across
+dozens of spelling variants. Second, word order and function words switch language
+mid-sentence, so features built for one language generalise poorly to the other.
+Third, abusive and identity terms are precisely the tokens most likely to be
+romanised, abbreviated or obfuscated. Character-level features and pretrained
+multilingual transformers are the two standard responses, at very different cost
+points: a TF-IDF linear model trains in seconds, a fine-tuned transformer needs a
+GPU and tens of minutes.
+
+Pretrained models aimed at this language pair have recently appeared: HingRoBERTa
+is an encoder further pretrained on romanised Hindi--English text
+\cite{hingroberta,nayak2022}, MuRIL covers Indian languages including Devanagari
+Hindi \cite{muril}, and XLM-RoBERTa covers one hundred languages \cite{xlmr}.
+What they promise is what the lexical baseline lacks---subword robustness and
+prior knowledge. Whether that promise converts into measurable accuracy on a
+public Hinglish benchmark, under a fixed and honest evaluation protocol, is the
+subject of this report.
+
+\section{Problem Statement}
+\label{sec:problem}
+
+The core question of this study is: \emph{on a public Hinglish hate-speech
+benchmark, and under an identical training and evaluation protocol, how much
+accuracy does pretrained multilingual pretraining buy over a character-level
+lexical baseline---and where exactly does the additional cost still fail?}
+
+Three sub-questions make this concrete. First, does fine-tuning a transformer
+beat the TF-IDF + linear-SVM baseline by a margin that survives multiple seeds and
+a statistical significance test, or is the gain within seed noise? Second, does
+the \emph{domain} of pretraining matter---romanised Hinglish (HingRoBERTa),
+Devanagari Indian languages (MuRIL), or a broad multilingual generalist
+(XLM-R)---for a task whose test text is mostly Roman script? Third, on which
+segments of the data do the models still fail: the hate class, the code-mixed
+posts, or text outside the training language, measured by a zero-shot transfer
+test to Marathi--English?
+
+A fourth concern is methodological rather than empirical: the numbers must be
+trustworthy. In an earlier version of this pipeline (v1), the transformer backbone
+was selected on \emph{test} macro-F1, which leaks test information into the
+model-selection decision and biases every reported test score. Version 2, reported
+here, enforces a strict discipline---all decisions (threshold, checkpoint, backbone)
+are made on the validation set, and the test set is touched once, for reporting.
+The protocol itself is therefore part of the contribution.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  node distance=2.6mm,
+  box/.style={draw=black!55, rounded corners=1.5pt, fill=blue!6,
+              minimum height=10mm, text width=19mm, align=center,
+              font=\scriptsize\sffamily},
+  arr/.style={-{Stealth[length=5pt]}, black!55}]
+  \node[box] (a) {Load PRISM\\(pinned revision)};
+  \node[box, right=of a] (b) {De-identify\\+ data card};
+  \node[box, right=of b] (c) {EDA +\\mixing metrics};
+  \node[box, right=of c] (d) {Train B0 / A0\\(3 seeds)};
+  \node[box, right=of d] (e) {Tune threshold\\(validation)};
+  \node[box, right=of e] (f) {Test, CI,\\McNemar};
+  \draw[arr] (a) -- (b);
+  \draw[arr] (b) -- (c);
+  \draw[arr] (c) -- (d);
+  \draw[arr] (d) -- (e);
+  \draw[arr] (e) -- (f);
+\end{tikzpicture}
+\caption[The experimental pipeline shared by all four models]{The experimental pipeline shared by all four models. Every stage writes
+checksummed artifacts; the test labels are used only in the final stage.}
+\label{fig:pipeline}
+\end{figure}
+
+\section{Scope of the Study}
+\label{sec:scope}
+
+Within the scope of this study are: binary (hate / non-hate) classification;
+the PRISM Hindi--English corpus as the only training resource \cite{prism}; three
+seeds per model; one fixed hyperparameter set shared by all transformers; and a
+single zero-shot transfer evaluation to L3Cube-MeHate \cite{mehate} without any
+training on it.
+
+Outside the scope are: multiclass or target-group labelling (PRISM provides binary
+labels only); training on Marathi or any other transfer language; domain
+adaptation, ensembling and model compression; large-scale hyperparameter search;
+and deployment or latency optimisation. Where the data forces a limitation---for
+example, the MeHate transfer set is the small 416-row code-mixed test split---the
+limitation is stated explicitly in the text rather than silently absorbed.
+
+\section{Main Contributions}
+\label{sec:contrib}
+
+The work of this report can be summarised in five points.
+
+\begin{itemize}
+\item \textbf{A leakage-safe evaluation protocol, fixed in code.} The decision
+threshold is tuned on the validation set only, the checkpoint and the best backbone
+are selected on validation macro-F1, and the test set is scored once per seed.
+Version 2 of the pipeline repairs a concrete v1 defect where the backbone was
+chosen on test macro-F1 (\S\ref{sec:protocol}).
+\item \textbf{A controlled four-model comparison.} One baseline and three
+transformers are trained under an exactly identical recipe---same splits, same
+metric, same seeds---so the comparison isolates the effect of pretraining rather
+than of protocol differences.
+\item \textbf{A code-mixing metric that can actually see Romanised Hinglish.}
+Version 1 measured the Devanagari script ratio, which assigns Romanised Hinglish a
+mixing score of zero. Version 2 performs word-level language identification using
+a compact romanised-Hindi lexicon, yielding a mixing index and word-level
+code-switch counts (\S\ref{sec:mixing}).
+\item \textbf{Statistical grounding.} Every headline number is a 3-seed mean with
+a bootstrap confidence interval around the mean, and every baseline-vs-transformer
+claim is backed by an exact McNemar test with Holm correction
+(\S\ref{sec:stats}).
+\item \textbf{A failure map, not only a leaderboard.} Performance is decomposed by
+language and by mixing bucket, and probed out of domain by a zero-shot transfer
+test, so the report states \emph{where} the three extra F1 points do not reach
+(\S\ref{sec:errors}--\S\ref{sec:transfer}).
+\end{itemize}
+
+\section{Organisation of the Report}
+\label{sec:org}
+
+Chapter~\ref{ch:method} details the datasets, the de-identification rules, the
+exploratory analysis, the four models, the training protocol and the evaluation
+methodology. Chapter~\ref{ch:results} presents the results: the main comparison,
+statistical significance, cost, training behaviour, error analysis and the
+cross-lingual transfer test. Chapter~\ref{ch:conclusion} states the conclusions, the limitations and the future
+work. Appendix~A provides a glossary of all technical terms and evaluation metrics
+used in the report, written so that a reader new to NLP evaluation can follow every
+table.

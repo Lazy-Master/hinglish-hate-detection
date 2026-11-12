@@ -1,0 +1,91 @@
+% =====================================================================
+% CHAPTER 5 — CONCLUSIONS AND FUTURE WORK
+% =====================================================================
+\chapter{Conclusions and Future Work}
+\label{ch:conclusion}
+
+\section{Conclusions}
+\label{sec:conclusions}
+
+This study asked how much accuracy pretrained multilingual encoders buy over a
+lexical baseline for binary hate-speech detection in Hinglish, under one shared
+protocol and an explicitly leakage-safe evaluation. The five conclusions below
+correspond to the five contributions of \S\ref{sec:contrib}.
+
+\begin{enumerate}
+\item \textbf{Pretraining wins by three points, significantly.} The TF-IDF +
+linear-SVM baseline reaches 0.7050 test macro-F1; the transformers reach 0.7300
+(HingRoBERTa), 0.7254 (MuRIL) and 0.7351 (XLM-R). All three gains are significant
+against the baseline under exact McNemar with Holm correction, with $p$-values
+between $10^{-4}$ and $10^{-13}$.
+\item \textbf{The domain-matched encoder does not win.} HingRoBERTa, pretrained on
+romanised Hinglish, finishes below the 100-language generalist XLM-R
+(0.7300 vs.\ 0.7351) with heavily overlapping confidence intervals; MuRIL trails
+both. At this data scale, three epochs of fine-tuning cannot be shown to exploit
+domain-matched pretraining better than a strong generalist.
+\item \textbf{The gain has a price and a shape.} The three F1 points cost roughly
+$96\times$ the training time and $13\times$ the inference latency; they
+concentrate on non-hate recall (0.824 vs.\ 0.740) while hate recall barely moves
+(0.645 vs.\ 0.670), and they leave the code-mixed error peak (32.0\% error rate)
+standing.
+\item \textbf{Evaluation discipline changed the outcome.} Selecting the backbone
+on validation rather than on test (the v1 defect) is not cosmetic: the protocol
+now guarantees reported test numbers free of model-selection bias. The threshold
+sweep, run on validation only, is worth at most $+0.0022$ F1 over the default
+rule---a useful negative result that closes an unexamined degree of freedom.
+\item \textbf{In-domain gains do not transfer.} The best model applied zero-shot
+to Marathi--English collapses from 0.7351 to 0.3770 macro-F1---below a
+majority-vote classifier. Cross-lingual robustness is not a free by-product of
+Hinglish fine-tuning.
+\end{enumerate}
+
+\section{Limitations}
+\label{sec:limits}
+
+Table~\ref{tab:limits} collects the limitations of this study together with their
+practical impact and the direction in which each can be addressed. They are
+stated here rather than discovered by the reader.
+
+\begin{table}[htbp]
+\centering
+\caption{Limitations, their impact, and improvement directions.}
+\label{tab:limits}
+\small
+\begin{tabular}{>{\raggedright\arraybackslash}p{3.7cm}>{\raggedright\arraybackslash}p{5.2cm}>{\raggedright\arraybackslash}p{4.4cm}}
+\toprule
+Limitation & Impact & Direction \\
+\midrule
+Binary labels only & No target-group or severity analysis & Multiclass PRISM variants; hierarchical heads \\
+Three seeds & Transformer std 0.004--0.006; transformer-vs-transformer gaps untestable & Five or more seeds; paired tests among A0 models \\
+Lexicon-based mixing metric & Mixing index is a lower bound on true mixing & Model-based language ID (e.g.\ fastText per token) \\
+MeHate transfer set: 416 posts, test split only & Wide CI ($\pm$0.03); no threshold re-tuning possible & Larger MeHate splits; small validation subset for calibration \\
+Fixed 3-epoch, single-config budget & Under-tuned transformers; no LR ablation & Small sweep per backbone; report sensitivity \\
+Hate recall ceiling untouched & Models miss $\sim$1 in 3 hate posts & Class-weighted loss, focal loss, hard-negative mining \\
+Regex de-identification & Plain-text names survive & NER-based scrubbing before release \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Future Work}
+\label{sec:future}
+
+Near term, three extensions follow directly from the error map. First, attack the
+hate-recall ceiling: class-weighted or focal losses, and threshold tuning
+optimising a recall floor instead of macro-F1, are one-line changes to the
+existing harness and can be evaluated with the same three-seed protocol. Second,
+make the mixing metric model-based (token-level language ID) so that the
+code-mixed bucket can be analysed without lexicon bias. Third, run five seeds and
+pairwise McNemar tests among the transformers so that the XLM-R vs.\ HingRoBERTa
+question, deliberately left open here, gets an answer.
+
+Medium term, the transfer failure deserves a dedicated study: adapter-based or
+LoRA fine-tuning on a small Marathi--English validation sample, calibrated
+thresholds per target domain, and a cascade architecture in which the cheap SVM
+handles confident posts and the transformer only the ambiguous middle band
+(\S\ref{sec:cost}). The disagreement export of \S\ref{sec:qualitative}---2{,}022
+labelled cases---is a ready-made starting set for mining hard examples.
+
+Long term, the pipeline is designed to generalise beyond one corpus: swapping the
+loader in Section~1 for any binary hate-speech dataset with a \emph{text, label,
+language} schema re-runs the whole study, and the pipeline's built-in self-tests
+verify the new plumbing before any GPU minute is spent.
